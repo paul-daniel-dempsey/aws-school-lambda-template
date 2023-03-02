@@ -8,7 +8,7 @@
       "executor": "nx:run-commands",
       "options": {
         "commands": [
-          "zip ../hello-world-lambda.zip *"
+          "zip -r ../hello-world-lambda.zip *"
         ],
         "cwd": "dist/packages/hello-world-lambda"
       },
@@ -19,28 +19,28 @@
       ]
     },
     "transpile": {
-      "executor": "@nrwl/esbuild:esbuild",
+      "executor": "@nrwl/webpack:webpack",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "platform": "node",
+        "target": "node",
+        "compiler": "tsc",
         "outputPath": "dist/packages/hello-world-lambda",
-        "format": ["cjs"],
-        "bundle": false,
+        "externalDependencies": "none",
         "main": "packages/hello-world-lambda/src/main.ts",
         "tsConfig": "packages/hello-world-lambda/tsconfig.app.json",
-        "assets": ["packages/hello-world-lambda/src/assets"],
-        "esbuildOptions": {
-          "sourcemap": true,
-          "outExtension": {
-            ".js": ".js"
-          }
-        }
+        "assets": ["packages/hello-world-lambda/src/assets"]
       },
       "configurations": {
         "production": {
-          "esbuildOptions": {
-            "sourcemap": false
-          }
+          "optimization": true,
+          "extractLicenses": true,
+          "inspect": false,
+          "fileReplacements": [
+            {
+              "replace": "packages/lambda/capi-poller/src/environments/environment.ts",
+              "with": "packages/lambda/capi-poller/src/environments/environment.prod.ts"
+            }
+          ]
         }
       }
     },
