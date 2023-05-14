@@ -3,6 +3,10 @@ import { parseISO } from 'date-fns';
 import { DynamoRecordFromEvent, DynamoRecordWrite } from './dynamo';
 import { EventShape } from './models';
 
+const exclusions = process.env['EXCLUDED_SOURCES']
+  ? process.env['EXCLUDED_SOURCES'].split(/\s*,\s*/)
+  : [];
+
 // Lesson 6+7 DynamoDB
 const handler: SNSHandler = async (event: SNSEvent) => {
   console.log(`Received ${event.Records.length} events`);
@@ -14,10 +18,14 @@ const handler: SNSHandler = async (event: SNSEvent) => {
       );
       const eventTS = parseISO(evt.Sns.Timestamp);
       const rec = DynamoRecordFromEvent(content, eventTS);
-      return DynamoRecordWrite(rec);
+      if (!exclusions.includes(rec.source)) {
+        return DynamoRecordWrite(rec);
+      } else {
+        return Promise.resolve();
+      }
     })
   );
-  console.log('Finished Dynamo write.');
+  console.log('Finished Dynamo exclusions write.');
 };
 
 export { handler };
