@@ -5,6 +5,7 @@ const handler: Handler = async (event, context) => {
   const s3Client = new S3Client({ region: process.env['AW_REGION'] });
   const bucketName = process.env['BUCKET'];
   const filePath = process.env['PATH'];
+  console.log(`Retrieving file at s3://${bucketName}/${filePath}`);
   if (!bucketName || !filePath) {
     throw new Error('Specify BUCKET and PATH');
   }
@@ -12,6 +13,7 @@ const handler: Handler = async (event, context) => {
     Bucket: bucketName,
     Key: filePath,
   });
+
   const response = await s3Client.send(req);
   console.log(`Found file with size ${response.ContentLength}...`);
   console.log('File contents is: ');
